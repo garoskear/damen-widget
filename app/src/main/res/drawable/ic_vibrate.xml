@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
+    <!-- phone body outline -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16.0,19.0L8.0,19.0L8.0,5.0L16.0,5.0L16.0,19.0zM16.5,3.0L7.5,3.0C6.67,3.0 6.0,3.67 6.0,4.5L6.0,19.5C6.0,20.33 6.67,21.0 7.5,21.0L16.5,21.0C17.33,21.0 18.0,20.33 18.0,19.5L18.0,4.5C18.0,3.67 17.33,3.0 16.5,3.0z" />
+    <!-- right bars -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19.0,7.0L21.0,7.0L21.0,17.0L19.0,17.0z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22.0,9.0L24.0,9.0L24.0,15.0L22.0,15.0z" />
+    <!-- left bars -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3.0,7.0L5.0,7.0L5.0,17.0L3.0,17.0z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0.0,9.0L2.0,9.0L2.0,15.0L0.0,15.0z" />
+</vector>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ringer Widget</string>
+    <string name="widget_description">Tap to toggle Ring / Vibrate</string>
+    <string name="volume_widget_description">Tap to adjust media volume</string>
+</resources>

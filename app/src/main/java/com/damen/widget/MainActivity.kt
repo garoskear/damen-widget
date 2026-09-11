@@ -3,6 +3,7 @@ package com.damen.widget
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -18,6 +19,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import rikka.shizuku.Shizuku
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 // Gateway (damen-gateway) ile aynı his: sistem monospace yığını.
 private val Mono = FontFamily.Monospace
@@ -40,6 +46,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Process widget'ı için 15 dakikalık periyodik tazeleme (tek seferlik plan).
+        try {
+            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "proc-refresh",
+                ExistingPeriodicWorkPolicy.KEEP,
+                PeriodicWorkRequestBuilder<ProcWorker>(15, TimeUnit.MINUTES).build()
+            )
+        } catch (_: Throwable) {
+        }
+
         setContent {
             MaterialTheme(colorScheme = NothingScheme) {
                 Surface(
@@ -48,7 +64,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen(
                         context = this,
-                        onRequestPermission = { requestDndPermission() }
+                        onRequestPermission = { requestDndPermission() },
+                        onRequestShizuku = { requestShizukuPermission() }
                     )
                 }
             }
@@ -61,15 +78,61 @@ class MainActivity : ComponentActivity() {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
         }
     }
+
+    private fun requestShizukuPermission() {
+        try {
+            if (Shizuku.pingBinder()) Shizuku.requestPermission(1001)
+        } catch (_: Throwable) {
+        }
+    }
 }
 
 @Composable
-fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
+fun MainScreen(
+    context: Context,
+    onRequestPermission: () -> Unit,
+    onRequestShizuku: () -> Unit
+) {
     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val hasPermission = nm.isNotificationPolicyAccessGranted
     val lastAction = remember {
         context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
             .getString("last_action", "henüz işlem yok") ?: "henüz işlem yok"
+    }
+
+    // ---------- shizuku durumu ----------
+    var shAlive by remember {
+        mutableStateOf(try { Shizuku.pingBinder() } catch (_: Throwable) { false })
+    }
+    var shGranted by remember {
+        mutableStateOf(
+            try { Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED }
+            catch (_: Throwable) { false }
+        )
+    }
+
+    DisposableEffect(Unit) {
+        val onReceived = Shizuku.OnBinderReceivedListener {
+            shAlive = true
+            shGranted = try {
+                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            } catch (_: Throwable) { false }
+        }
+        val onDead = Shizuku.OnBinderDeadListener {
+            shAlive = false
+            shGranted = false
+        }
+        val onPerm = Shizuku.OnRequestPermissionResultListener { _, grant ->
+            shGranted = grant == PackageManager.PERMISSION_GRANTED
+        }
+        Shizuku.addBinderReceivedListener(onReceived)
+        Shizuku.addBinderDeadListener(onDead)
+        Shizuku.addRequestPermissionResultListener(onPerm)
+        onDispose {
+            Shizuku.removeBinderReceivedListener(onReceived)
+            Shizuku.removeBinderDeadListener(onDead)
+            Shizuku.removeRequestPermissionResultListener(onPerm)
+        }
     }
 
     Column(
@@ -88,7 +151,7 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Toggle (1×1) — Shizuku aç/kapa",
+            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Durum (1×1) — server açık/kapalı\nGateway (1×1) — pi web aç/kapa\nProcs (4×2) — çalışan process'ler",
             fontFamily = Mono,
             fontSize = 14.sp,
             color = Color(0xFFAAAAAA),
@@ -146,7 +209,45 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ---------- shizuku card ----------
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.outlinedCardColors(containerColor = NothingCard),
+            border = BorderStroke(1.dp, if (shAlive) Color(0xFF333333) else NothingRed)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "SHIZUKU",
+                    fontFamily = Mono,
+                    fontSize = 16.sp,
+                    color = if (shAlive) Color.White else NothingRed
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "server: ${if (shAlive) "açık" else "kapalı"} • izin: ${if (shGranted) "var" else "yok"}",
+                    fontFamily = Mono,
+                    fontSize = 14.sp,
+                    color = Color(0xFFCCCCCC)
+                )
+                if (shAlive && !shGranted) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = onRequestShizuku,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("İZNİ VER", fontFamily = Mono)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // ---------- son işlem kartı (widget teşhisi) ----------
         OutlinedCard(

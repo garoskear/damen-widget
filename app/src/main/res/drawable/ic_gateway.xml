@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dot-matrix "W" (web) in Nothing style. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,18h10v10h-10z M72,18h10v10h-10z M24,30h10v10h-10z M72,30h10v10h-10z M24,42h10v10h-10z M72,42h10v10h-10z M24,54h10v10h-10z M48,54h10v10h-10z M72,54h10v10h-10z M24,66h10v10h-10z M48,66h10v10h-10z M72,66h10v10h-10z M24,78h10v10h-10z M36,78h10v10h-10z M60,78h10v10h-10z M72,78h10v10h-10z" />
+</vector>

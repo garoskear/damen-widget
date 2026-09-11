@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- needed for haptic feedback -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- gateway durum kontrolü: localhost HTTP -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Shizuku uygulamasını bulabilmek için (API 30+ paket görünürlüğü) -->
     <queries>
@@ -16,6 +18,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
@@ -55,15 +58,6 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
 
-        <!-- Transparent trampoline: Shizuku aç/kapa -->
-        <activity
-            android:name=".ShizukuToggleActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|screenSize" />
-
         <!-- 1x1 Ringer toggle widget -->
         <receiver
             android:name=".RingerWidgetReceiver"
@@ -90,6 +84,15 @@
                 android:resource="@xml/volume_widget_info" />
         </receiver>
 
+        <!-- Transparent trampoline: pi web aç/kapa -->
+        <activity
+            android:name=".GatewayToggleActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|screenSize" />
+
         <!-- 1x1 Shizuku toggle widget -->
         <receiver
             android:name=".ShizukuWidgetReceiver"
@@ -101,6 +104,32 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/shizuku_widget_info" />
+        </receiver>
+
+        <!-- 1x1 pi web toggle widget -->
+        <receiver
+            android:name=".GatewayWidgetReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/gateway_widget_info" />
+        </receiver>
+
+        <!-- 4x2 process listesi widget -->
+        <receiver
+            android:name=".ProcWidgetReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/proc_widget_info" />
         </receiver>
 
     </application>

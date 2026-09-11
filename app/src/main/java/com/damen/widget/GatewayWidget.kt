@@ -33,6 +33,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // pi web (damen-gateway) durum widget'ı: siyah kare, beyaz W.
 // ON = hazır, BOOT = açılıyor, OFF = kapalı.
@@ -45,22 +47,22 @@ class GatewayWidget : GlanceAppWidget() {
     companion object {
         const val HEALTH_URL = "http://127.0.0.1:8787/api/health"
 
-        // 2 = hazır, 1 = açılıyor/cevap veriyor, 0 = kapalı
-        fun probe(): Int {
-            return try {
-                val c = (URL(HEALTH_URL).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 1500
-                    readTimeout = 1500
-                }
-                val code = c.responseCode
-                val body = try {
-                    c.inputStream.bufferedReader().readText()
-                } catch (_: Throwable) { "" }
-                c.disconnect()
-                if (code == 200 && body.contains("\"ready\":true")) 2 else 1
-            } catch (_: Throwable) {
-                0
+        // 2 = hazır, 1 = cevap veriyor ama hazır değil, 0 = kapalı
+        fun probe(): Int = try { probeThrowing() } catch (_: Throwable) { 0 }
+
+        fun probeThrowing(): Int {
+            val c = (URL(HEALTH_URL).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 1500
+                readTimeout = 1500
             }
+            val code = c.responseCode
+            val body = try {
+                c.inputStream.bufferedReader().readText()
+            } catch (_: Throwable) { "" }
+            c.disconnect()
+            if (code == 200 && body.contains("\"ready\":true")) return 2
+            if (code in 200..499) return 1
+            return 0
         }
     }
 
@@ -145,7 +147,7 @@ class GatewayRefreshAction : ActionCallback {
         parameters: ActionParameters
     ) {
         try {
-            val state = GatewayWidget.probe()
+            val state = withContext(Dispatchers.IO) { GatewayWidget.probeThrowing() }
             GatewayWidget().update(context, glanceId)
             val label = when (state) {
                 2 -> "ON"
@@ -154,7 +156,7 @@ class GatewayRefreshAction : ActionCallback {
             }
             widgetToast(context, "Gateway: $label")
         } catch (t: Throwable) {
-            widgetToast(context, "Gateway hata: ${t.message}")
+            widgetToast(context, "Probe: ${t.javaClass.simpleName}")
         }
     }
 }

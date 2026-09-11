@@ -8,8 +8,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -26,6 +28,9 @@ import androidx.glance.unit.ColorProvider
 
 // Nothing OS style: black bar, white segments, red tip marks the live level.
 class VolumeWidget : GlanceAppWidget() {
+
+    override val sizeMode: SizeMode =
+        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {

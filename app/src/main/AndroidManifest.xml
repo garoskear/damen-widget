@@ -84,15 +84,6 @@
                 android:resource="@xml/volume_widget_info" />
         </receiver>
 
-        <!-- Transparent trampoline: pi web aç/kapa -->
-        <activity
-            android:name=".GatewayToggleActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|screenSize" />
-
         <!-- 1x1 Shizuku toggle widget -->
         <receiver
             android:name=".ShizukuWidgetReceiver"

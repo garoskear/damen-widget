@@ -10,8 +10,10 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -28,6 +30,9 @@ import androidx.glance.unit.ColorProvider
 // Nothing OS style: pure black tile, white glyph, LED status dot.
 // Red dot = vibrate, dim grey dot = ring.
 class RingerWidget : GlanceAppWidget() {
+
+    override val sizeMode: SizeMode =
+        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -66,7 +71,9 @@ class RingerWidget : GlanceAppWidget() {
                 Image(
                     provider = ImageProvider(iconRes),
                     contentDescription = label,
-                    modifier = GlanceModifier.size(32.dp)
+                    modifier = GlanceModifier.size(
+                        if (LocalSize.current.width < 100.dp) 26.dp else 32.dp
+                    )
                 )
                 Spacer(modifier = GlanceModifier.height(8.dp))
                 Box(

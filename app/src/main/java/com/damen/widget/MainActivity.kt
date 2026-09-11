@@ -46,12 +46,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Process widget'ı için 15 dakikalık periyodik tazeleme (tek seferlik plan).
+        // 15 dakikalık periyodik tazeleme: tüm durum widget'ları (tek seferlik plan).
         try {
             WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "proc-refresh",
+                "refresh-all",
                 ExistingPeriodicWorkPolicy.KEEP,
-                PeriodicWorkRequestBuilder<ProcWorker>(15, TimeUnit.MINUTES).build()
+                PeriodicWorkRequestBuilder<RefreshWorker>(15, TimeUnit.MINUTES).build()
             )
         } catch (_: Throwable) {
         }
@@ -151,7 +151,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Durum (1×1) — server açık/kapalı\nGateway (1×1) — pi web aç/kapa\nProcs (4×2) — çalışan process'ler",
+            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Durum (1×1) — server açık/kapalı\nGateway (1×1) — pi web durumu\nProcs (4×2) — çalışan process'ler",
             fontFamily = Mono,
             fontSize = 14.sp,
             color = Color(0xFFAAAAAA),

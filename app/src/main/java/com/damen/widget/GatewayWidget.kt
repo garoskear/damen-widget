@@ -1,7 +1,6 @@
 package com.damen.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -10,9 +9,13 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
+import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -31,9 +34,13 @@ import androidx.glance.unit.ColorProvider
 import java.net.HttpURLConnection
 import java.net.URL
 
-// pi web (damen-gateway) durum + toggle: siyah kare, beyaz W.
-// ON = hazır, BOOT = açılıyor, OFF = kapalı. Dokun: başlat/durdur.
+// pi web (damen-gateway) durum widget'ı: siyah kare, beyaz W.
+// ON = hazır, BOOT = açılıyor, OFF = kapalı.
+// Dokunmak yalnızca durumu tazeler (Termux komutu yok).
 class GatewayWidget : GlanceAppWidget() {
+
+    override val sizeMode: SizeMode =
+        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
 
     companion object {
         const val HEALTH_URL = "http://127.0.0.1:8787/api/health"
@@ -59,12 +66,12 @@ class GatewayWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            WidgetContent(context)
+            WidgetContent()
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent() {
         val state = probe()
         val dotColor = when (state) {
             2 -> Color(0xFFFF0000)
@@ -77,14 +84,16 @@ class GatewayWidget : GlanceAppWidget() {
             else -> "OFF"
         }
         val textColor = if (state == 0) Color(0xFF888888) else Color(0xFFFFFFFF)
-        val intent = Intent(context, GatewayToggleActivity::class.java)
+        val showLabel = LocalSize.current.width >= 110.dp
+        val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(ColorProvider(Color(0xFF000000)))
                 .cornerRadius(22.dp)
-                .clickable(actionStartActivity(intent)),
+                .clickable(actionRunCallback<GatewayRefreshAction>()),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -94,7 +103,9 @@ class GatewayWidget : GlanceAppWidget() {
                 Image(
                     provider = ImageProvider(R.drawable.ic_gateway),
                     contentDescription = "pi web: $label",
-                    modifier = GlanceModifier.size(30.dp)
+                    modifier = GlanceModifier.size(
+                        if (LocalSize.current.width < 100.dp) 24.dp else 30.dp
+                    )
                 )
                 Spacer(modifier = GlanceModifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -104,16 +115,35 @@ class GatewayWidget : GlanceAppWidget() {
                             .background(ColorProvider(dotColor))
                             .cornerRadius(4.dp)
                     ) {}
-                    Spacer(modifier = GlanceModifier.width(6.dp))
-                    Text(
-                        text = label,
-                        style = TextStyle(
-                            color = ColorProvider(textColor),
-                            fontSize = 11.sp
+                    if (showLabel) {
+                        Spacer(modifier = GlanceModifier.width(6.dp))
+                        Text(
+                            text = label,
+                            style = TextStyle(
+                                color = ColorProvider(textColor),
+                                fontSize = 11.sp
+                            )
                         )
-                    )
+                    }
                 }
+                Text(
+                    text = time,
+                    style = TextStyle(
+                        color = ColorProvider(Color(0xFF555555)),
+                        fontSize = 9.sp
+                    )
+                )
             }
         }
+    }
+}
+
+class GatewayRefreshAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        GatewayWidget().update(context, glanceId)
     }
 }

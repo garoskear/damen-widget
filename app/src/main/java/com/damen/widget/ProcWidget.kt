@@ -11,10 +11,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -42,6 +44,9 @@ import rikka.shizuku.Shizuku
 // ayrıca her 15 dakikada arka planda tazelenir (ProcWorker).
 class ProcWidget : GlanceAppWidget() {
 
+    override val sizeMode: SizeMode =
+        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val alive = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
         val granted = try {
@@ -68,6 +73,13 @@ class ProcWidget : GlanceAppWidget() {
             !granted -> "İZİN YOK"
             procs!!.isEmpty() -> "VERİ YOK"
             else -> null
+        }
+        val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        val rowCount = when {
+            LocalSize.current.height < 140.dp -> 3
+            LocalSize.current.height < 200.dp -> 5
+            else -> 7
         }
 
         Box(
@@ -99,7 +111,7 @@ class ProcWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.defaultWeight()
                     )
                     Text(
-                        text = "TAP",
+                        text = "TAP $time",
                         style = TextStyle(
                             color = ColorProvider(Color(0xFF666666)),
                             fontSize = 10.sp
@@ -116,7 +128,7 @@ class ProcWidget : GlanceAppWidget() {
                         )
                     )
                 } else {
-                    procs!!.forEach { (name, mem) ->
+                    procs!!.take(rowCount).forEach { (name, mem) ->
                         Row(
                             modifier = GlanceModifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -189,7 +201,7 @@ fun parseProcs(out: String): List<Pair<String, String>> {
         .mapValues { it.value.sum() }
         .toList()
         .sortedByDescending { it.second }
-        .take(6)
+        .take(8)
         .map { (name, rss) ->
             val short = if (name.length > 14) name.take(13) + "…" else name
             short to "${rss / 1024} MB"

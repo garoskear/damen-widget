@@ -10,10 +10,12 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -36,6 +38,9 @@ import rikka.shizuku.Shizuku
 // Dokunmak yalnızca durumu tazeler (hiçbir uygulama açılmaz).
 class ShizukuWidget : GlanceAppWidget() {
 
+    override val sizeMode: SizeMode =
+        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             WidgetContent(context)
@@ -53,6 +58,9 @@ class ShizukuWidget : GlanceAppWidget() {
         val dotColor = if (running) Color(0xFFFF0000) else Color(0xFF3A3A3A)
         val stateText = if (running) "RUNNING" else "STOPPED"
         val textColor = if (running) Color(0xFFFFFFFF) else Color(0xFF888888)
+        val showLabel = LocalSize.current.width >= 110.dp
+        val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
 
         Box(
             modifier = GlanceModifier
@@ -79,15 +87,24 @@ class ShizukuWidget : GlanceAppWidget() {
                             .background(ColorProvider(dotColor))
                             .cornerRadius(4.dp)
                     ) {}
-                    Spacer(modifier = GlanceModifier.width(6.dp))
-                    Text(
-                        text = stateText,
-                        style = TextStyle(
-                            color = ColorProvider(textColor),
-                            fontSize = 11.sp
+                    if (showLabel) {
+                        Spacer(modifier = GlanceModifier.width(6.dp))
+                        Text(
+                            text = stateText,
+                            style = TextStyle(
+                                color = ColorProvider(textColor),
+                                fontSize = 11.sp
+                            )
                         )
-                    )
+                    }
                 }
+                Text(
+                    text = time,
+                    style = TextStyle(
+                        color = ColorProvider(Color(0xFF555555)),
+                        fontSize = 9.sp
+                    )
+                )
             }
         }
     }

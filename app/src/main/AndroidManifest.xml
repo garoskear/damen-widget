@@ -6,6 +6,11 @@
     <!-- needed for haptic feedback -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Shizuku uygulamasını bulabilmek için (API 30+ paket görünürlüğü) -->
+    <queries>
+        <package android:name="moe.shizuku.privileged.api" />
+    </queries>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -30,9 +35,25 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
 
+        <!-- Shizuku binder köprüsü (durum kontrolü için) -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
         <!-- Transparent trampoline: handles volume slider tap, sets volume -->
         <activity
             android:name=".SetVolumeActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|screenSize" />
+
+        <!-- Transparent trampoline: Shizuku aç/kapa -->
+        <activity
+            android:name=".ShizukuToggleActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
@@ -61,6 +82,19 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/volume_widget_info" />
+        </receiver>
+
+        <!-- 1x1 Shizuku toggle widget -->
+        <receiver
+            android:name=".ShizukuWidgetReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/shizuku_widget_info" />
         </receiver>
 
     </application>

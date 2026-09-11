@@ -14,13 +14,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val DotMatrix = FontFamily(Font(R.font.dot_gothic_16))
+// Gateway (damen-gateway) ile aynı his: sistem monospace yığını.
+private val Mono = FontFamily.Monospace
 private val NothingRed = Color(0xFFFF0000)
 private val NothingCard = Color(0xFF101010)
 
@@ -75,7 +75,7 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
     ) {
         Text(
             text = "● DAMEN WIDGET",
-            fontFamily = DotMatrix,
+            fontFamily = Mono,
             fontSize = 26.sp,
             color = Color.White,
             textAlign = TextAlign.Center
@@ -84,8 +84,8 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume",
-            fontFamily = DotMatrix,
+            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Toggle (1×1) — Shizuku aç/kapa",
+            fontFamily = Mono,
             fontSize = 14.sp,
             color = Color(0xFFAAAAAA),
             textAlign = TextAlign.Center
@@ -102,7 +102,7 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = if (hasPermission) "● READY" else "● PERMISSION NEEDED",
-                    fontFamily = DotMatrix,
+                    fontFamily = Mono,
                     fontSize = 16.sp,
                     color = if (hasPermission) Color.White else NothingRed
                 )
@@ -128,7 +128,7 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
                     contentColor = Color.Black
                 )
             ) {
-                Text("GRANT PERMISSION", fontFamily = DotMatrix)
+                Text("GRANT PERMISSION", fontFamily = Mono)
             }
         }
 
@@ -137,7 +137,7 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
         // ---------- how-to card ----------
         Text(
             text = "SETUP",
-            fontFamily = DotMatrix,
+            fontFamily = Mono,
             fontSize = 16.sp,
             color = NothingRed
         )

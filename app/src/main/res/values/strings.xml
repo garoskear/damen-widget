@@ -3,4 +3,5 @@
     <string name="app_name">Damen Widget</string>
     <string name="widget_description">Tap to toggle Ring / Vibrate</string>
     <string name="volume_widget_description">Tap to adjust media volume</string>
+    <string name="shizuku_widget_description">Shizuku aç/kapa</string>
 </resources>

@@ -55,4 +55,8 @@ dependencies {
     // Glance widget
     implementation("androidx.glance:glance-appwidget:1.0.0")
     implementation("androidx.glance:glance-material3:1.0.0")
+
+    // Shizuku: server durum kontrolü (durdur/başlat broadcast'leri saf intent, izin istemez)
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dot-matrix "S" in Nothing style, matches launcher icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,12h10v10h-10z M48,12h10v10h-10z M60,12h10v10h-10z M72,12h10v10h-10z M24,24h10v10h-10z M24,36h10v10h-10z M36,48h10v10h-10z M48,48h10v10h-10z M60,48h10v10h-10z M72,60h10v10h-10z M72,72h10v10h-10z M24,84h10v10h-10z M36,84h10v10h-10z M48,84h10v10h-10z M60,84h10v10h-10z" />
+</vector>

@@ -148,7 +148,8 @@ class GatewayRefreshAction : ActionCallback {
         parameters: ActionParameters
     ) {
         try {
-            val state = withContext(Dispatchers.IO) { GatewayWidget.probeThrowing() }
+            // probe() asla fırlatmaz (hata=0): her durumda yeniden çiz.
+            val state = withContext(Dispatchers.IO) { GatewayWidget.probe() }
             GatewayWidget().update(context, glanceId)
             val label = when (state) {
                 2 -> "ON"

@@ -5,5 +5,5 @@
     <string name="volume_widget_description">Tap to adjust media volume</string>
     <string name="shizuku_widget_description">Shizuku aç/kapa</string>
     <string name="gateway_widget_description">pi web başlat/durdur</string>
-    <string name="proc_widget_description">Çalışan process'ler (belleğe göre ilk 6)</string>
+    <string name="proc_widget_description">Çalışan process\'ler (belleğe göre ilk 6)</string>
 </resources>

@@ -12,9 +12,6 @@ import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.LargeBox
-import androidx.glance.appwidget.MediumBox
-import androidx.glance.appwidget.SmallBox
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -33,7 +30,7 @@ import androidx.glance.unit.ColorProvider
 class VolumeWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(SmallBox, MediumBox, LargeBox))
+        SizeMode.Responsive(setOf(BarS, BarM, BarL))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {

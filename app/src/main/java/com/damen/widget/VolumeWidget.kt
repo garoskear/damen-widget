@@ -31,8 +31,7 @@ import androidx.glance.unit.ColorProvider
 // Dokunmak yalnızca seviyeyi tazeler (ses değiştirmez).
 class VolumeWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(BarS, BarM, BarL))
+    override val sizeMode: SizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -90,7 +89,7 @@ class VolumeRefreshAction : ActionCallback {
         parameters: ActionParameters
     ) {
         try {
-            VolumeWidget().update(context, glanceId)
+            VolumeWidget().updateAll(context)
             val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             val cur = am.getStreamVolume(AudioManager.STREAM_MUSIC)

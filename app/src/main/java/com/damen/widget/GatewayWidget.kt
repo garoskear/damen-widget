@@ -41,8 +41,7 @@ import kotlinx.coroutines.withContext
 // Dokunmak yalnızca durumu tazeler (Termux komutu yok).
 class GatewayWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(BoxS, BoxM, BoxL))
+    override val sizeMode: SizeMode = SizeMode.Single
 
     companion object {
         const val HEALTH_URL = "http://127.0.0.1:8787/api/health"
@@ -150,7 +149,7 @@ class GatewayRefreshAction : ActionCallback {
         try {
             // probe() asla fırlatmaz (hata=0): her durumda yeniden çiz.
             val state = withContext(Dispatchers.IO) { GatewayWidget.probe() }
-            GatewayWidget().update(context, glanceId)
+            GatewayWidget().updateAll(context)
             val label = when (state) {
                 2 -> "ON"
                 1 -> "BOOT"

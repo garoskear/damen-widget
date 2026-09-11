@@ -38,8 +38,7 @@ import rikka.shizuku.Shizuku
 // Dokunmak yalnızca durumu tazeler (hiçbir uygulama açılmaz).
 class ShizukuWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(BoxS, BoxM, BoxL))
+    override val sizeMode: SizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -119,7 +118,7 @@ class ShizukuRefreshAction : ActionCallback {
     ) {
         try {
             val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
-            ShizukuWidget().update(context, glanceId)
+            ShizukuWidget().updateAll(context)
             widgetToast(context, "Shizuku: " + if (running) "RUNNING" else "STOPPED")
         } catch (t: Throwable) {
             widgetToast(context, "Shizuku hata: ${t.message}")

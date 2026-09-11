@@ -37,8 +37,7 @@ import androidx.glance.unit.ColorProvider
 // Dokunmak yalnızca durumu tazeler (mod değiştirmez).
 class RingerWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(BoxS, BoxM, BoxL))
+    override val sizeMode: SizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -112,7 +111,7 @@ class RingerRefreshAction : ActionCallback {
         parameters: ActionParameters
     ) {
         try {
-            RingerWidget().update(context, glanceId)
+            RingerWidget().updateAll(context)
             val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val label = if (am.ringerMode == AudioManager.RINGER_MODE_VIBRATE) "VIB" else "RING"
             widgetToast(context, "Zil: $label")

@@ -44,8 +44,7 @@ import rikka.shizuku.Shizuku
 // ayrıca her 15 dakikada arka planda tazelenir (ProcWorker).
 class ProcWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(PanelS, PanelM, PanelL))
+    override val sizeMode: SizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val alive = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
@@ -215,7 +214,7 @@ class ProcRefreshAction : ActionCallback {
         parameters: ActionParameters
     ) {
         try {
-            ProcWidget().update(context, glanceId)
+            ProcWidget().updateAll(context)
             val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                 .format(java.util.Date())
             widgetToast(context, "Procs tazelelendi $time")

@@ -17,7 +17,7 @@ android {
 
     // Sabit imza: her CI derlemesi aynı anahtarla imzalanır, üstüne kurulum çalışır.
     signingConfigs {
-        create("debug") {
+        getByName("debug") {
             storeFile = file("damen-debug.keystore")
             storePassword = "android"
             keyAlias = "damen"

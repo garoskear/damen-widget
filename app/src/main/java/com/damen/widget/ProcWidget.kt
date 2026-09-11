@@ -1,7 +1,10 @@
 package com.damen.widget
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.IBinder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -10,6 +13,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionRunCallback
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.cornerRadius
@@ -29,31 +33,36 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import rikka.shizuku.Shizuku
 
-// Çalışan process'ler: Shizuku (root/shell) üzerinden `ps` çeker,
+// Çalışan process'ler: Shizuku UserService (root/shell) içinde `ps` çeker,
 // belleğe göre ilk 6 grubu gösterir. Dokun = tazele,
 // ayrıca her 15 dakikada arka planda tazelenir (ProcWorker).
 class ProcWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            WidgetContent()
-        }
-    }
-
-    @Composable
-    private fun WidgetContent() {
         val alive = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
         val granted = try {
             alive && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         } catch (_: Throwable) { false }
-
-        val procs: List<Pair<String, String>>? = when {
-            !alive -> null
-            !granted -> null
-            else -> try { probeProcs() } catch (_: Throwable) { emptyList() }
+        val procs: List<Pair<String, String>>? = if (!alive || !granted) {
+            null
+        } else {
+            try { parseProcs(fetchPs(context)) } catch (_: Throwable) { emptyList() }
         }
+        provideContent {
+            WidgetContent(alive, granted, procs)
+        }
+    }
+
+    @Composable
+    private fun WidgetContent(
+        alive: Boolean,
+        granted: Boolean,
+        procs: List<Pair<String, String>>?
+    ) {
         val note = when {
             !alive -> "SHIZUKU KAPALI"
             !granted -> "İZİN YOK"
@@ -137,32 +146,56 @@ class ProcWidget : GlanceAppWidget() {
     }
 }
 
-// `ps` çıktısını (COMM, RSS kB) isim bazında topla, ilk 6.
-fun probeProcs(): List<Pair<String, String>> {
-    val p = Shizuku.newProcess(arrayOf("sh", "-c", "ps -A -o COMM,RSS"), null, null)
-    try {
-        val out = p.inputStream.bufferedReader().readText()
-        p.waitFor()
-        return out.lineSequence()
-            .mapNotNull { line ->
-                val parts = line.trim().split(Regex("\\s+"))
-                if (parts.size < 2) return@mapNotNull null
-                val rss = parts.last().toIntOrNull() ?: return@mapNotNull null
-                if (rss <= 0) return@mapNotNull null
-                parts.dropLast(1).joinToString(" ") to rss
+// UserService'e bağlan, `ps` çıktısını al, çöz.
+suspend fun fetchPs(context: Context): String = withTimeout(8000) {
+    suspendCancellableCoroutine { cont ->
+        val conn = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                try {
+                    val svc = IProcService.Stub.asInterface(binder)
+                    cont.resume(svc.topProcesses()) { _, _, _ -> }
+                } catch (t: Throwable) {
+                    if (!cont.isCompleted) cont.resumeWithException(t)
+                } finally {
+                    try { Shizuku.unbindUserService(this, true) } catch (_: Throwable) {}
+                }
             }
-            .groupBy({ it.first }, { it.second })
-            .mapValues { it.value.sum() }
-            .toList()
-            .sortedByDescending { it.second }
-            .take(6)
-            .map { (name, rss) ->
-                val short = if (name.length > 14) name.take(13) + "…" else name
-                short to "${rss / 1024} MB"
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                if (!cont.isCompleted) {
+                    cont.resumeWithException(IllegalStateException("shizuku disconnected"))
+                }
             }
-    } finally {
-        try { p.destroy() } catch (_: Throwable) {}
+        }
+        Shizuku.bindUserService(
+            Shizuku.UserServiceArgs(ComponentName(context, ProcUserService::class.java)),
+            conn
+        )
+        cont.invokeOnCancellation {
+            try { Shizuku.unbindUserService(conn, true) } catch (_: Throwable) {}
+        }
     }
+}
+
+// `ps -A -o COMM,RSS` çıktısını isim bazında topla, ilk 6.
+fun parseProcs(out: String): List<Pair<String, String>> {
+    return out.lineSequence()
+        .mapNotNull { line ->
+            val parts = line.trim().split(Regex("\\s+"))
+            if (parts.size < 2) return@mapNotNull null
+            val rss = parts.last().toIntOrNull() ?: return@mapNotNull null
+            if (rss <= 0) return@mapNotNull null
+            parts.dropLast(1).joinToString(" ") to rss
+        }
+        .groupBy({ it.first }, { it.second })
+        .mapValues { it.value.sum() }
+        .toList()
+        .sortedByDescending { it.second }
+        .take(6)
+        .map { (name, rss) ->
+            val short = if (name.length > 14) name.take(13) + "…" else name
+            short to "${rss / 1024} MB"
+        }
 }
 
 class ProcRefreshAction : ActionCallback {

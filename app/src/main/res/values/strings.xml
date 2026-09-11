@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Damen Widget</string>
-    <string name="widget_description">Tap to toggle Ring / Vibrate</string>
-    <string name="volume_widget_description">Tap to adjust media volume</string>
+    <string name="widget_description">Zil durumu (dokun=tazele)</string>
+    <string name="volume_widget_description">Ses seviyesi (dokun=tazele)</string>
     <string name="shizuku_widget_description">Shizuku aç/kapa</string>
     <string name="gateway_widget_description">pi web durumu (dokun=tazele)</string>
     <string name="proc_widget_description">Çalışan process\'ler (belleğe göre ilk 6)</string>

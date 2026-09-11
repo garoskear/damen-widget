@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- needed to call setRingerMode / mute streams -->
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-    <!-- needed for haptic feedback -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- gateway durum kontrolü: localhost HTTP -->
+    <!-- gateway durum kontrolü: localhost HTTP -->    <!-- gateway durum kontrolü: localhost HTTP -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Shizuku uygulamasını bulabilmek için (API 30+ paket görünürlüğü) -->
@@ -31,15 +27,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Transparent trampoline: handles widget tap, toggles mode, triggers re-render -->
-        <activity
-            android:name=".ToggleActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|screenSize" />
-
         <!-- Shizuku binder köprüsü (durum kontrolü için) -->
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
@@ -48,15 +35,6 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
-        <!-- Transparent trampoline: handles volume slider tap, sets volume -->
-        <activity
-            android:name=".SetVolumeActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|screenSize" />
 
         <!-- 1x1 Ringer toggle widget -->
         <receiver

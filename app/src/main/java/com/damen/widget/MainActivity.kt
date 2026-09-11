@@ -1,11 +1,8 @@
 package com.damen.widget
 
-import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -19,11 +16,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import rikka.shizuku.Shizuku
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
+import rikka.shizuku.Shizuku
 
 // Gateway (damen-gateway) ile aynı his: sistem monospace yığını.
 private val Mono = FontFamily.Monospace
@@ -64,18 +61,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen(
                         context = this,
-                        onRequestPermission = { requestDndPermission() },
                         onRequestShizuku = { requestShizukuPermission() }
                     )
                 }
             }
-        }
-    }
-
-    private fun requestDndPermission() {
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (!nm.isNotificationPolicyAccessGranted) {
-            startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
         }
     }
 
@@ -88,18 +77,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
-    context: Context,
-    onRequestPermission: () -> Unit,
-    onRequestShizuku: () -> Unit
-) {
-    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val hasPermission = nm.isNotificationPolicyAccessGranted
-    val lastAction = remember {
-        context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-            .getString("last_action", "henüz işlem yok") ?: "henüz işlem yok"
-    }
-
+fun MainScreen(context: Context, onRequestShizuku: () -> Unit) {
     // ---------- shizuku durumu ----------
     var shAlive by remember {
         mutableStateOf(try { Shizuku.pingBinder() } catch (_: Throwable) { false })
@@ -151,7 +129,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Ringer Toggle (1×1) — Ring/Vibrate\nVolume Slider (4×1) — media volume\nShizuku Durum (1×1) — server açık/kapalı\nGateway (1×1) — pi web durumu\nProcs (4×2) — çalışan process'ler",
+            text = "Ringer Durum (1×1) — zil hâli\nSes (4×1) — medya seviyesi\nShizuku Durum (1×1) — server açık/kapalı\nGateway (1×1) — pi web durumu\nProcs (4×2) — çalışan process'ler\n\nHepsi durum gösterir, dokun=tazele.",
             fontFamily = Mono,
             fontSize = 14.sp,
             color = Color(0xFFAAAAAA),
@@ -169,47 +147,6 @@ fun MainScreen(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
-
-        // ---------- permission card ----------
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.outlinedCardColors(containerColor = NothingCard),
-            border = BorderStroke(1.dp, if (hasPermission) Color(0xFF333333) else NothingRed)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = if (hasPermission) "● READY" else "● PERMISSION NEEDED",
-                    fontFamily = Mono,
-                    fontSize = 16.sp,
-                    color = if (hasPermission) Color.White else NothingRed
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (hasPermission)
-                        "Everything is set. Add the widget to your home screen."
-                    else
-                        "Grant \"Do Not Disturb\" access so the widget can change the ringer mode.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFCCCCCC)
-                )
-            }
-        }
-
-        if (!hasPermission) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onRequestPermission,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text("GRANT PERMISSION", fontFamily = Mono)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // ---------- shizuku card ----------
         OutlinedCard(
@@ -244,26 +181,6 @@ fun MainScreen(
                         Text("İZNİ VER", fontFamily = Mono)
                     }
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ---------- son işlem kartı (widget teşhisi) ----------
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.outlinedCardColors(containerColor = NothingCard),
-            border = BorderStroke(1.dp, Color(0xFF333333))
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "SON İŞLEM",
-                    fontFamily = Mono,
-                    fontSize = 14.sp,
-                    color = NothingRed
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(lastAction, color = Color(0xFFCCCCCC))
             }
         }
 

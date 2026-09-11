@@ -1,34 +1,40 @@
 package com.damen.widget
 
 import android.content.Context
-import android.content.Intent
 import android.media.AudioManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
+import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.size
+import androidx.glance.layout.width
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
-// Nothing OS style: pure black tile, white glyph, LED status dot.
-// Red dot = vibrate, dim grey dot = ring.
+// Zil durum widget'ı: siyah kare, beyaz ikon, LED + yazı.
+// Dokunmak yalnızca durumu tazeler (mod değiştirmez).
 class RingerWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode =
@@ -51,17 +57,17 @@ class RingerWidget : GlanceAppWidget() {
         val isVibrate = currentMode == AudioManager.RINGER_MODE_VIBRATE
 
         val iconRes = if (isVibrate) R.drawable.ic_vibrate else R.drawable.ic_bell
-        val label = if (isVibrate) "Vibrate" else "Ring"
+        val label = if (isVibrate) "VIB" else "RING"
         val dotColor = if (isVibrate) Color(0xFFFF0000) else Color(0xFF3A3A3A)
-
-        val toggleIntent = Intent(context, ToggleActivity::class.java)
+        val textColor = if (isVibrate) Color(0xFFFFFFFF) else Color(0xFF888888)
+        val showLabel = LocalSize.current.width >= 110.dp
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(ColorProvider(Color(0xFF000000)))
                 .cornerRadius(22.dp)
-                .clickable(actionStartActivity(toggleIntent)),
+                .clickable(actionRunCallback<RingerRefreshAction>()),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -70,19 +76,41 @@ class RingerWidget : GlanceAppWidget() {
             ) {
                 Image(
                     provider = ImageProvider(iconRes),
-                    contentDescription = label,
+                    contentDescription = "Zil: $label",
                     modifier = GlanceModifier.size(
                         if (LocalSize.current.width < 100.dp) 26.dp else 32.dp
                     )
                 )
-                Spacer(modifier = GlanceModifier.height(8.dp))
-                Box(
-                    modifier = GlanceModifier
-                        .size(8.dp)
-                        .background(ColorProvider(dotColor))
-                        .cornerRadius(4.dp)
-                ) {}
+                Spacer(modifier = GlanceModifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = GlanceModifier
+                            .size(7.dp)
+                            .background(ColorProvider(dotColor))
+                            .cornerRadius(4.dp)
+                    ) {}
+                    if (showLabel) {
+                        Spacer(modifier = GlanceModifier.width(6.dp))
+                        Text(
+                            text = label,
+                            style = TextStyle(
+                                color = ColorProvider(textColor),
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+class RingerRefreshAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        RingerWidget().update(context, glanceId)
     }
 }

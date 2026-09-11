@@ -1,4 +1,4 @@
-package com.example.ringerwidget
+package com.damen.widget
 
 import android.content.Context
 import android.content.Intent
@@ -24,6 +24,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.unit.ColorProvider
 
+// Nothing OS style: black bar, white segments, red tip marks the live level.
 class VolumeWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -37,16 +38,16 @@ class VolumeWidget : GlanceAppWidget() {
         val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val currentVol = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-        
+
         // Convert to percentage (0-10 scale for 10 boxes)
         val currentLevel = ((currentVol.toFloat() / maxVol) * 10).toInt()
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(ColorProvider(Color(0xFFF5F5F5)))
-                .cornerRadius(16.dp)
-                .padding(8.dp)
+                .background(ColorProvider(Color(0xFF000000)))
+                .cornerRadius(22.dp)
+                .padding(12.dp)
         ) {
             Row(
                 modifier = GlanceModifier.fillMaxSize(),
@@ -57,10 +58,11 @@ class VolumeWidget : GlanceAppWidget() {
                         context = context,
                         level = level,
                         isActive = level <= currentLevel,
+                        isTip = level == currentLevel && currentLevel > 0,
                         modifier = GlanceModifier.defaultWeight()
                     )
                     if (level < 10) {
-                        Spacer(modifier = GlanceModifier.width(4.dp))
+                        Spacer(modifier = GlanceModifier.width(3.dp))
                     }
                 }
             }
@@ -72,9 +74,14 @@ class VolumeWidget : GlanceAppWidget() {
         context: Context,
         level: Int,
         isActive: Boolean,
+        isTip: Boolean,
         modifier: GlanceModifier
     ) {
-        val bgColor = if (isActive) Color(0xFF1E88E5) else Color(0xFFE0E0E0)
+        val bgColor = when {
+            isTip -> Color(0xFFFF0000)
+            isActive -> Color(0xFFFFFFFF)
+            else -> Color(0xFF232323)
+        }
         val intent = Intent(context, SetVolumeActivity::class.java).apply {
             putExtra("volume_level", level)
         }
@@ -83,10 +90,10 @@ class VolumeWidget : GlanceAppWidget() {
             modifier = modifier
                 .fillMaxHeight()
                 .background(ColorProvider(bgColor))
-                .cornerRadius(8.dp)
+                .cornerRadius(5.dp)
                 .clickable(actionStartActivity(intent))
         ) {
-            // Empty — this is just a colored box representing a volume level
+            // Empty — this is just a segment representing a volume level
         }
     }
 }

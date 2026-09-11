@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RingerWidget"
+rootProject.name = "DamenWidget"
 include(":app")

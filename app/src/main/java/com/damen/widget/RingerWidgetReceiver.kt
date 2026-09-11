@@ -1,4 +1,4 @@
-package com.example.ringerwidget
+package com.damen.widget
 
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 

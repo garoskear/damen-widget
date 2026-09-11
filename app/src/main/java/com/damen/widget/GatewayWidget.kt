@@ -14,6 +14,9 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.LargeBox
+import androidx.glance.appwidget.MediumBox
+import androidx.glance.appwidget.SmallBox
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
@@ -40,7 +43,7 @@ import java.net.URL
 class GatewayWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode =
-        SizeMode.Responsive(setOf(SizeMode.Small, SizeMode.Medium, SizeMode.Large))
+        SizeMode.Responsive(setOf(SmallBox, MediumBox, LargeBox))
 
     companion object {
         const val HEALTH_URL = "http://127.0.0.1:8787/api/health"

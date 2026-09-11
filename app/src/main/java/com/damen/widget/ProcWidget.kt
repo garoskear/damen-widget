@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.action.ActionParameters
-import androidx.glance.action.actionRunCallback
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.cornerRadius
@@ -33,7 +33,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
 import rikka.shizuku.Shizuku
 
@@ -148,32 +148,30 @@ class ProcWidget : GlanceAppWidget() {
 
 // UserService'e bağlan, `ps` çıktısını al, çöz.
 suspend fun fetchPs(context: Context): String = withTimeout(8000) {
-    suspendCancellableCoroutine { cont ->
-        val conn = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                try {
-                    val svc = IProcService.Stub.asInterface(binder)
-                    cont.resume(svc.topProcesses()) { _, _, _ -> }
-                } catch (t: Throwable) {
-                    if (!cont.isCompleted) cont.resumeWithException(t)
-                } finally {
-                    try { Shizuku.unbindUserService(this, true) } catch (_: Throwable) {}
-                }
+    val deferred = CompletableDeferred<String>()
+    val args = Shizuku.UserServiceArgs(ComponentName(context, ProcUserService::class.java))
+        .processNameSuffix("procs")
+    val conn = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            try {
+                val svc = IProcService.Stub.asInterface(binder)
+                deferred.complete(svc.topProcesses())
+            } catch (t: Throwable) {
+                deferred.completeExceptionally(t)
+            } finally {
+                try { Shizuku.unbindUserService(args, this, true) } catch (_: Throwable) {}
             }
+        }
 
-            override fun onServiceDisconnected(name: ComponentName?) {
-                if (!cont.isCompleted) {
-                    cont.resumeWithException(IllegalStateException("shizuku disconnected"))
-                }
-            }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            deferred.completeExceptionally(IllegalStateException("shizuku disconnected"))
         }
-        Shizuku.bindUserService(
-            Shizuku.UserServiceArgs(ComponentName(context, ProcUserService::class.java)),
-            conn
-        )
-        cont.invokeOnCancellation {
-            try { Shizuku.unbindUserService(conn, true) } catch (_: Throwable) {}
-        }
+    }
+    Shizuku.bindUserService(args, conn)
+    try {
+        deferred.await()
+    } finally {
+        try { Shizuku.unbindUserService(args, conn, true) } catch (_: Throwable) {}
     }
 }
 

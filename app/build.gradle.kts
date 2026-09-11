@@ -3,16 +3,34 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Sürüm her push'ta otomatik artar: commit sayısı (CI'da fetch-depth:0 gerekir).
+val commitCount: Int = try {
+    ProcessBuilder("git", "rev-list", "--count", "HEAD")
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start().inputStream.bufferedReader().readText().trim().toInt()
+} catch (_: Exception) { 1 }
+
 android {
     namespace = "com.damen.widget"
     compileSdk = 34
+
+    // Sabit imza: her CI derlemesi aynı anahtarla imzalanır, üstüne kurulum çalışır.
+    signingConfigs {
+        create("debug") {
+            storeFile = file("damen-debug.keystore")
+            storePassword = "android"
+            keyAlias = "damen"
+            keyPassword = "android"
+        }
+    }
 
     defaultConfig {
         applicationId = "com.damen.widget"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = commitCount
+        versionName = "1.0.$commitCount"
     }
 
     buildTypes {

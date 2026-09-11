@@ -32,6 +32,8 @@
         <activity
             android:name=".ToggleActivity"
             android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
 
@@ -48,6 +50,8 @@
         <activity
             android:name=".SetVolumeActivity"
             android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
 
@@ -55,6 +59,8 @@
         <activity
             android:name=".ShizukuToggleActivity"
             android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|screenSize" />
 

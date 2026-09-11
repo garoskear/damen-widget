@@ -23,6 +23,7 @@ class ToggleActivity : ComponentActivity() {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (!nm.isNotificationPolicyAccessGranted) {
                 Toast.makeText(this, "Izin gerekli", Toast.LENGTH_SHORT).show()
+                stamp("Ringer: izin yok, uygulamaya yönlendirildi")
                 startActivity(
                     Intent(this, MainActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -62,11 +63,20 @@ class ToggleActivity : ComponentActivity() {
             ).show()
 
             // Kick the Glance re-render, then exit.
+            stamp("Ringer → " + if (newMode == AudioManager.RINGER_MODE_VIBRATE) "Titresim" else "Sesli")
             runBlocking { RingerWidget().updateAll(this@ToggleActivity) }
         } catch (t: Throwable) {
             Toast.makeText(this, "Hata: ${t.message}", Toast.LENGTH_LONG).show()
+            stamp("Ringer HATA: ${t.message}")
         } finally {
             finish()
         }
+    }
+
+    private fun stamp(msg: String) {
+        val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+            .edit().putString("last_action", "$msg • $time").apply()
     }
 }

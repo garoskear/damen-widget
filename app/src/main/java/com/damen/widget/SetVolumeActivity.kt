@@ -36,11 +36,19 @@ class SetVolumeActivity : ComponentActivity() {
             Toast.makeText(this, "Ses: $level/10", Toast.LENGTH_SHORT).show()
 
             // Trigger widget update
+            stamp("Ses: $level/10")
             runBlocking { VolumeWidget().updateAll(this@SetVolumeActivity) }
         } catch (t: Throwable) {
             Toast.makeText(this, "Hata: ${t.message}", Toast.LENGTH_LONG).show()
         } finally {
             finish()
         }
+    }
+
+    private fun stamp(msg: String) {
+        val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+            .edit().putString("last_action", "$msg • $time").apply()
     }
 }

@@ -67,6 +67,10 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val hasPermission = nm.isNotificationPolicyAccessGranted
+    val lastAction = remember {
+        context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+            .getString("last_action", "henüz işlem yok") ?: "henüz işlem yok"
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -88,6 +92,16 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
             fontFamily = Mono,
             fontSize = 14.sp,
             color = Color(0xFFAAAAAA),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            fontFamily = Mono,
+            fontSize = 12.sp,
+            color = Color(0xFF666666),
             textAlign = TextAlign.Center
         )
 
@@ -133,6 +147,26 @@ fun MainScreen(context: Context, onRequestPermission: () -> Unit) {
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // ---------- son işlem kartı (widget teşhisi) ----------
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.outlinedCardColors(containerColor = NothingCard),
+            border = BorderStroke(1.dp, Color(0xFF333333))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "SON İŞLEM",
+                    fontFamily = Mono,
+                    fontSize = 14.sp,
+                    color = NothingRed
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(lastAction, color = Color(0xFFCCCCCC))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // ---------- how-to card ----------
         Text(

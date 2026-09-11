@@ -111,6 +111,13 @@ class RingerRefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        RingerWidget().update(context, glanceId)
+        try {
+            RingerWidget().update(context, glanceId)
+            val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val label = if (am.ringerMode == AudioManager.RINGER_MODE_VIBRATE) "VIB" else "RING"
+            widgetToast(context, "Zil: $label")
+        } catch (t: Throwable) {
+            widgetToast(context, "Zil hata: ${t.message}")
+        }
     }
 }

@@ -144,6 +144,17 @@ class GatewayRefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        GatewayWidget().update(context, glanceId)
+        try {
+            val state = GatewayWidget.probe()
+            GatewayWidget().update(context, glanceId)
+            val label = when (state) {
+                2 -> "ON"
+                1 -> "BOOT"
+                else -> "OFF"
+            }
+            widgetToast(context, "Gateway: $label")
+        } catch (t: Throwable) {
+            widgetToast(context, "Gateway hata: ${t.message}")
+        }
     }
 }

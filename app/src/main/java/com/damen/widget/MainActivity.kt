@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.glance.appwidget.updateAll
 import java.util.concurrent.TimeUnit
 import rikka.shizuku.Shizuku
 
@@ -42,6 +43,20 @@ private val NothingScheme = darkColorScheme(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Uygulama açılınca tüm widget'ları hemen tazele.
+        Thread {
+            try {
+                kotlinx.coroutines.runBlocking {
+                    ShizukuWidget().updateAll(this@MainActivity)
+                    GatewayWidget().updateAll(this@MainActivity)
+                    ProcWidget().updateAll(this@MainActivity)
+                    RingerWidget().updateAll(this@MainActivity)
+                    VolumeWidget().updateAll(this@MainActivity)
+                }
+            } catch (_: Throwable) {
+            }
+        }.start()
 
         // 15 dakikalık periyodik tazeleme: tüm durum widget'ları (tek seferlik plan).
         try {

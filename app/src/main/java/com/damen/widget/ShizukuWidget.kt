@@ -117,6 +117,12 @@ class ShizukuRefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        ShizukuWidget().update(context, glanceId)
+        try {
+            val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
+            ShizukuWidget().update(context, glanceId)
+            widgetToast(context, "Shizuku: " + if (running) "RUNNING" else "STOPPED")
+        } catch (t: Throwable) {
+            widgetToast(context, "Shizuku hata: ${t.message}")
+        }
     }
 }

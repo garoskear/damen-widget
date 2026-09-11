@@ -1,32 +1,37 @@
 # Damen Widget
 
-Nothing OS tarzı Android home-screen widget'ları. [RingerWidget](https://github.com/Yaksh-Patel/RingerWidget) (MIT) tabanlıdır, baştan temalandı.
+Nothing OS tarzı Android home-screen **durum widget'ları**. [RingerWidget](https://github.com/Yaksh-Patel/RingerWidget) (MIT) tabanlıdır, baştan temalandı.
 
-## Widget'lar
+Tüm widget'lar aynı sözleşmede: **durumu gösterir, dokunmak tazeler, hiçbiri uygulama açmaz.**
 
-| Widget | Boyut | İşlev |
+| Widget | Boyut | Gösterir |
 |---|---|---|
-| Ringer Toggle | 1×1 | Dokun → Ring / Vibrate geçişi. Kırmızı LED = vibrate |
-| Volume Slider | 4×1 | Dokun → medya sesi. Kırmızı uç = mevcut seviye |
+| Zil | 1×1 | Ring/VIB + LED (kırmızı = titreşim) |
+| Ses | 4×1 | Medya seviyesi (kırmızı uç = anlık seviye) |
+| Shizuku | 1×1 | RUNNING/STOPPED + LED |
+| Gateway | 1×1 | pi web ON/BOOT/OFF (`/api/health`) |
+| Procs | 4×2 | Bellek kullanımına göre ilk process'ler (Shizuku `ps`) |
+
+- **Responsive:** hepsi yeniden boyutlandırılabilir; içerik `LocalSize` ile boyuta uyarlanır (dar 1×1'de yazı gizlenir, Procs satır sayısı yüksekliğe göre 3/5/7).
+- **Otomatik tazeleme:** WorkManager 15 dk'da bir üç durum widget'ını da yeniler; widget içindeki saat verinin yaşıdır.
+- **Shizuku izni** uygulamadan istenir (SHIZUKU kartı → İZNİ VER).
+- **Process listesi** Shizuku UserService (AIDL) içinde `ps -A -o COMM,RSS` ile çekilir.
 
 ## Tasarım dili
 
-- Saf siyah zemin `#000`, beyaz glifler, tek kırmızı vurgu `#FF0000`
-- Uygulama içi yazı tipi: DotGothic16 (dot-matrix, OFL lisanslı)
+- Saf siyah zemin `#000`, beyaz dot-matrix glifler, tek kırmızı vurgu `#FF0000`
+- Yazı: sistem monospace yığını (damen-gateway ile aynı his)
 - Launcher ikonu: dot-matrix "D" + imza kırmızı nokta
 
 ## APK alma
 
-Telefonda derleme yok — GitHub'a push'layınca Actions `assembleDebug` çalıştırıp APK'yı artifact olarak verir (`.github/workflows/android.yml`). İlk push'tan önce kendi GitHub reponda yeni repo açıp remote'u oraya çevir:
+Telefonda derleme yok — GitHub Actions derler:
+
+- **Her push:** debug APK, artifact olarak (`APK` workflow)
+- **`v*` tag'i:** imzalı release APK, GitHub Releases'e düşer (`Release` workflow)
 
 ```sh
-git remote remove origin
-git remote add origin https://github.com/KULLANICI/damen-widget.git
-git push -u origin main
+git tag v1.0 && git push origin v1.0   # release tetikler
 ```
 
-## Yol haritası
-
-- Shizuku aç/kapa toggle'ı
-- pi web (damen-gateway) başlat/durdur toggle'ı
-- Çalışan process'ler listesi widget'ı
+İmza repodaki `app/damen-debug.keystore` ile (debug + release aynı anahtar).

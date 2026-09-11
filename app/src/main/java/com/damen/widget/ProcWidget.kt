@@ -218,9 +218,7 @@ class ProcRefreshAction : ActionCallback {
             ProcWidget().updateAll(context)
             val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                 .format(java.util.Date())
-            widgetToast(context, "Procs tazelelendi $time")
         } catch (t: Throwable) {
-            widgetToast(context, "Procs hata: ${t.message}")
         }
     }
 }

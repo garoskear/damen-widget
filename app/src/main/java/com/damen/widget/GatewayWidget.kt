@@ -156,9 +156,7 @@ class GatewayRefreshAction : ActionCallback {
                 1 -> "BOOT"
                 else -> "OFF"
             }
-            widgetToast(context, "Gateway: $label")
         } catch (t: Throwable) {
-            widgetToast(context, "Probe: ${t.javaClass.simpleName}")
         }
     }
 }

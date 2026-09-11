@@ -120,9 +120,7 @@ class ShizukuRefreshAction : ActionCallback {
         try {
             val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
             ShizukuWidget().updateAll(context)
-            widgetToast(context, "Shizuku: " + if (running) "RUNNING" else "STOPPED")
         } catch (t: Throwable) {
-            widgetToast(context, "Shizuku hata: ${t.message}")
         }
     }
 }

@@ -95,9 +95,7 @@ class VolumeRefreshAction : ActionCallback {
             val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             val cur = am.getStreamVolume(AudioManager.STREAM_MUSIC)
             val level = ((cur.toFloat() / maxVol) * 10).toInt()
-            widgetToast(context, "Ses: $level/10")
         } catch (t: Throwable) {
-            widgetToast(context, "Ses hata: ${t.message}")
         }
     }
 }

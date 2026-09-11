@@ -23,6 +23,12 @@ android {
             keyAlias = "damen"
             keyPassword = "android"
         }
+        create("release") {
+            storeFile = file("damen-debug.keystore")
+            storePassword = "android"
+            keyAlias = "damen"
+            keyPassword = "android"
+        }
     }
 
     defaultConfig {
@@ -40,6 +46,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 

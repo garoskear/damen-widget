@@ -67,14 +67,15 @@ class GatewayWidget : GlanceAppWidget() {
     }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // Ağ ana thread'de yasak: durumu çizimden önce IO'da hesapla.
+        val state = withContext(Dispatchers.IO) { probe() }
         provideContent {
-            WidgetContent()
+            WidgetContent(state)
         }
     }
 
     @Composable
-    private fun WidgetContent() {
-        val state = probe()
+    private fun WidgetContent(state: Int) {
         val dotColor = when (state) {
             2 -> Color(0xFFFF0000)
             1 -> Color(0xFF888888)
